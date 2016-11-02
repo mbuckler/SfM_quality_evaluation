@@ -49,6 +49,8 @@ output_eval_dir = os.path.join(sys.argv[3], "evaluation_output")
 #  . compute camera motion
 #  . perform quality evaluation regarding ground truth camera trajectory
 
+rmse_sum = 0
+
 for directory in os.listdir(input_eval_dir):
 
   print directory
@@ -99,6 +101,21 @@ for directory in os.listdir(input_eval_dir):
   command = command + " -o " + outStatistics_dir
   proc = subprocess.Popen((str(command)), shell=True)
   proc.wait()
+
+  # Parse the output file 
+  with open(outStatistics_dir+'/../SfMReconstruction_Report.html') as stats_file:
+    for line in stats_file:
+      start = 'SfM Scene RMSE:'
+      end   = '<hr><br>'
+      if start in line:
+        final_rmse = float((line.split(start))[1].split(end)[0])
+
+  rmse_sum = rmse_sum + final_rmse
+
+rmse_average = rmse_sum / 6
+
+print('\nAverage RMSE: ')
+print rmse_average
 
 sys.exit(1)
 
